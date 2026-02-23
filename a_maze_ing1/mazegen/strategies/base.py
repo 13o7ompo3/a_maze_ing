@@ -15,3 +15,16 @@ class GenerationStrategy(ABC):
     @abstractmethod
     def apply(self):
         pass
+
+
+class SolverStrategy(ABC):
+    def __init__(self, grid: Grid, entry: tuple, exit: tuple,
+                 viz: ConsoleVisualizer):
+        self.grid = grid
+        self.entry = entry
+        self.exit = exit
+        self.viz = viz
+
+    @abstractmethod
+    def solve(self) -> str:
+        pass

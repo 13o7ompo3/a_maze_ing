@@ -53,9 +53,8 @@ class Kruskal(GenerationStrategy):
             if cell_a in self.cells_42 or cell_b in self.cells_42:
                 continue
 
-            if ds.find(idx_a) != ds.find(idx_b):
-                ds.union(idx_a, idx_b)
+            if ds.union(idx_a, idx_b):
                 self.grid.remove_wall(cell_a[0], cell_a[1], wall_a)
                 self.grid.remove_wall(cell_b[0], cell_b[1], wall_b)
-                sleep(0.01)
+                sleep(0.04)
                 self.viz.render()

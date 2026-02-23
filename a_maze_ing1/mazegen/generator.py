@@ -1,4 +1,3 @@
-import sys
 from mazegen.grid import Grid
 import random
 from mazegen.strategies.backtracker import RecursiveBacktracker
@@ -9,7 +8,7 @@ from mazegen.visualizer import ConsoleVisualizer
 
 class MazeGenerator:
     def __init__(self, grid: Grid, width: int, height: int,
-                 viz: ConsoleVisualizer, seed: int,
+                 viz: ConsoleVisualizer, seed: str | int,
                  algorithm_name="backtracker"):
         self.width = width
         self.height = height
@@ -22,7 +21,7 @@ class MazeGenerator:
 
     def generate(self):
         self._imprint_42()
-
+        self.viz.imprint_42 = self.imprint_42
         strategies = {
             "backtracker": RecursiveBacktracker,
             "kruskal": Kruskal,
@@ -49,8 +48,7 @@ class MazeGenerator:
         shape_w = len(shape[0])
 
         if self.width < shape_w + 2 or self.height < shape_h + 2:
-            print("Warning: Maze too small for '42' pattern.")
-            return
+            raise ValueError("Grid too small for imprinting 42")
 
         start_x = (self.width - shape_w) // 2
         start_y = (self.height - shape_h) // 2
