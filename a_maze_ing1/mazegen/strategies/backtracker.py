@@ -30,9 +30,11 @@ class RecursiveBacktracker(GenerationStrategy):
                 self.grid.remove_wall(x, y, wall)
                 self.grid.remove_wall(nx, ny, opp_wall)
                 sleep(0.04)
-                self.viz.render()
+                self.viz.render_cells(x, y)
+                self.viz.render_cells(nx, ny)
 
                 self.apply(nx, ny)
+        self.viz.render()
         self.rng.shuffle(neighbours)
         for c, wall, opp_wall in neighbours:
             nx, ny = c

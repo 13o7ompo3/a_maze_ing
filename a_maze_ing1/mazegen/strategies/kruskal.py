@@ -57,4 +57,5 @@ class Kruskal(GenerationStrategy):
                 self.grid.remove_wall(cell_a[0], cell_a[1], wall_a)
                 self.grid.remove_wall(cell_b[0], cell_b[1], wall_b)
                 sleep(0.04)
-                self.viz.render()
+                self.viz.render_cells(cell_a[0], cell_a[1])
+                self.viz.render_cells(cell_b[0], cell_b[1])

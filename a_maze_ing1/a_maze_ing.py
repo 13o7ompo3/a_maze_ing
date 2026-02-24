@@ -55,8 +55,6 @@ def parse_config(filepath: str) -> dict:
         config['EXIT'] = tuple(map(int, config['EXIT'].split(',')))
     except (ValueError, IndexError):
         raise ValueError("Invalid number format in config")
-    # if 'SEED' not in config:
-    #     config['SEED'] = int(time.time() * 1000)
     if 'ALGORITHM' not in config:
         config['ALGORITHM'] = "backtracker"
     if 'STRATEGY' not in config:
@@ -66,9 +64,11 @@ def parse_config(filepath: str) -> dict:
 
 if __name__ == "__main__":
     try:
-
         config = parse_config(sys.argv[1])
         color_idx = 0
+        os.system('cls' if os.name == 'nt' else 'clear')
+        sys.stdout.write("\033[?25l")
+        sys.stdout.flush()
 
         while True:
             if 'SEED' not in config:
@@ -137,7 +137,10 @@ if __name__ == "__main__":
                     sys.exit(0)
                 else:
                     print("Invalid choice.")
-
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+    finally:
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()
+        os.system('cls' if os.name == 'nt' else 'clear')

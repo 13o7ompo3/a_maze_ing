@@ -48,62 +48,124 @@ class ConsoleVisualizer:
 
         wall_color = COLORS[self.color_idx]
         print(f"MAZE VISUALIZATION ({self.grid.width}x{self.grid.height})")
-
         for y in range(self.grid.height):
-            top_line = ""
             for x in range(self.grid.width):
-                val = self.grid.get_value(x, y)
-                top_line += f"{wall_color}+{RESET}"
-                if val & 1:
-                    top_line += f"{wall_color}---{RESET}"
-                elif (self.show_path and (x, y) in self.path_coords and
-                      (x, y - 1) in self.path_coords):
-                    top_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
-                    top_line += f"███{RESET}"
-                else:
-                    top_line += "   "
-            print(top_line + f"{wall_color}+{RESET}")
+                self.render_cells(x, y)
 
-            mid_line = ""
-            for x in range(self.grid.width):
-                val = self.grid.get_value(x, y)
 
-                if val & 8:
-                    mid_line += f"{wall_color}|{RESET}"
-                elif (self.show_path and (x, y) in self.path_coords and
-                      (x - 1, y) in self.path_coords):
-                    mid_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
-                    mid_line += f"█{RESET}"
-                else:
-                    mid_line += " "
+        # for y in range(self.grid.height):
+        #     top_line = ""
+        #     for x in range(self.grid.width):
+        #         val = self.grid.get_value(x, y)
+        #         top_line += f"{wall_color}+{RESET}"
+        #         if val & 1:
+        #             top_line += f"{wall_color}---{RESET}"
+        #         elif (self.show_path and (x, y) in self.path_coords and
+        #               (x, y - 1) in self.path_coords):
+        #             top_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
+        #             top_line += f"███{RESET}"
+        #         else:
+        #             top_line += "   "
+        #     print(top_line + f"{wall_color}+{RESET}")
 
-                if (x, y) == self.entry:
-                    mid_line += " E "
-                elif (x, y) == self.exit:
-                    mid_line += " X "
-                elif self.show_path and (x, y) in self.path_coords:
-                    mid_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
-                    mid_line += f"███{RESET}"
-                elif (x, y) in self.imprint_42:
-                    mid_line += f"{COLORS[len(COLORS) - 1 - self.color_idx]}"
-                    mid_line += f"███{RESET}"
-                else:
-                    mid_line += "   "
+        #     mid_line = ""
+        #     for x in range(self.grid.width):
+        #         val = self.grid.get_value(x, y)
 
-            last_val = self.grid.get_value(self.grid.width - 1, y)
-            if last_val & 2:
+        #         if val & 8:
+        #             mid_line += f"{wall_color}|{RESET}"
+        #         elif (self.show_path and (x, y) in self.path_coords and
+        #               (x - 1, y) in self.path_coords):
+        #             mid_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
+        #             mid_line += f"█{RESET}"
+        #         else:
+        #             mid_line += " "
+
+        #         if (x, y) == self.entry:
+        #             mid_line += " E "
+        #         elif (x, y) == self.exit:
+        #             mid_line += " X "
+        #         elif self.show_path and (x, y) in self.path_coords:
+        #             mid_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
+        #             mid_line += f"███{RESET}"
+        #         elif (x, y) in self.imprint_42:
+        #             mid_line += f"{COLORS[len(COLORS) - 1 - self.color_idx]}"
+        #             mid_line += f"███{RESET}"
+        #         else:
+        #             mid_line += "   "
+
+        #     last_val = self.grid.get_value(self.grid.width - 1, y)
+        #     if last_val & 2:
+        #         mid_line += f"{wall_color}|{RESET}"
+        #     else:
+        #         mid_line += " "
+        #     print(mid_line)
+
+        # bot_line = ""
+        # for x in range(self.grid.width):
+        #     val = self.grid.get_value(x, self.grid.height - 1)
+        #     bot_line += f"{wall_color}+{RESET}"
+        #     if val & 4:
+        #         bot_line += f"{wall_color}---{RESET}"
+        #     else:
+        #         bot_line += "   "
+        # print(bot_line + f"{wall_color}+{RESET}")
+        sys.stdout.flush()
+    
+    def render_cells(self, x: int, y: int):
+        """Render a specific cell in the maze"""
+        val = self.grid.get_value(x, y)
+        wall_color = COLORS[self.color_idx]
+        t_x = 4 * x + 1
+        t_y = 2 * y + 2
+        sys.stdout.write(f"\033[{t_y};{t_x}H")
+        top_line = ""
+        top_line += f"{wall_color}+{RESET}"
+        if val & 1:
+            top_line += f"{wall_color}---{RESET}"
+        elif (self.show_path and (x, y) in self.path_coords and
+              (x, y - 1) in self.path_coords):
+            top_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
+            top_line += f"███{RESET}"
+        else:
+            top_line += "   "
+        sys.stdout.write(top_line + f"{wall_color}+{RESET}")
+        sys.stdout.write(f"\033[{t_y + 1};{t_x}H")
+        mid_line = ""
+        if val & 8:
+            mid_line += f"{wall_color}|{RESET}"
+        elif (self.show_path and (x, y) in self.path_coords and
+              (x - 1, y) in self.path_coords):
+            mid_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
+            mid_line += f"█{RESET}"
+        else:
+            mid_line += " "
+
+        if (x, y) == self.entry:
+            mid_line += " E "
+        elif (x, y) == self.exit:
+            mid_line += " X "
+        elif self.show_path and (x, y) in self.path_coords:
+            mid_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
+            mid_line += f"███{RESET}"
+        elif (x, y) in self.imprint_42:
+            mid_line += f"{COLORS[len(COLORS) - 1 - self.color_idx]}"
+            mid_line += f"███{RESET}"
+        else:
+            mid_line += "   "
+        if x == self.grid.width - 1:
+            if val & 2:
                 mid_line += f"{wall_color}|{RESET}"
             else:
                 mid_line += " "
-            print(mid_line)
-
-        bot_line = ""
-        for x in range(self.grid.width):
-            val = self.grid.get_value(x, self.grid.height - 1)
+        sys.stdout.write(mid_line)
+        sys.stdout.write(f"\033[{t_y + 2};{t_x}H")
+        if y == self.grid.height - 1:
+            bot_line = ""
             bot_line += f"{wall_color}+{RESET}"
             if val & 4:
                 bot_line += f"{wall_color}---{RESET}"
             else:
                 bot_line += "   "
-        print(bot_line + f"{wall_color}+{RESET}")
+            sys.stdout.write(bot_line + f"{wall_color}+{RESET}")
         sys.stdout.flush()

@@ -33,6 +33,7 @@ class MazeGenerator:
         strategy_class = strategies[self.algorithm_name]
         strategy = strategy_class(self.grid, self.rng, self.imprint_42,
                                   self.viz)
+        self.viz.render()
         strategy.apply()
 
     def _imprint_42(self):
