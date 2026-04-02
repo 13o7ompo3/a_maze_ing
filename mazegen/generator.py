@@ -8,16 +8,19 @@ from mazegen.visualizer import ConsoleVisualizer
 
 class MazeGenerator:
     def __init__(self, grid: Grid, width: int, height: int,
-                 viz: ConsoleVisualizer, seed: str | int,
-                 algorithm_name="backtracker"):
+                 viz: ConsoleVisualizer | None = None, seed: str | None = None,
+                 algorithm_name: str = "backtracker",
+                 perfect: bool = True, vizualize: bool = True):
         self.width = width
         self.height = height
         self.grid = grid
         self.visited = set()
         self.imprint_42 = set()
-        self.rng = random.Random(seed)
+        self.rng = random.Random(seed) if seed is not None else random.Random()
         self.algorithm_name = algorithm_name
         self.viz = viz
+        self.perfect = perfect
+        self.vizualize = vizualize
 
     def generate(self):
         self._imprint_42()

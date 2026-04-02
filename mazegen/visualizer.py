@@ -52,7 +52,7 @@ class ConsoleVisualizer:
         for y in range(self.grid.height):
             for x in range(self.grid.width):
                 self.render_cells(x, y)
-    
+
     def render_cells(self, x: int, y: int):
         """Render a specific cell in the maze"""
         val = self.grid.get_value(x, y)
@@ -82,7 +82,10 @@ class ConsoleVisualizer:
         else:
             mid_line += " "
 
-        if (x, y) == self.entry:
+        if self.player and (x, y) == self.player:
+            mid_line += f"{COLORS[len(COLORS) - 1 - self.color_idx]}"
+            mid_line += f" P {RESET}"
+        elif (x, y) == self.entry:
             mid_line += " E "
         elif (x, y) == self.exit:
             mid_line += " X "

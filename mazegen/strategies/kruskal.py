@@ -28,11 +28,12 @@ class DisjointSet:
 
 class Kruskal(GenerationStrategy):
     def __init__(self, grid: Grid, rng: Random, cells_42: set,
-                 viz: ConsoleVisualizer):
-        super().__init__(grid, rng, cells_42, viz)
+                 viz: ConsoleVisualizer = None, perfect: bool = True,
+                 vizualize: bool = True) -> None:
+        super().__init__(grid, rng, cells_42, viz, perfect, vizualize)
         self.disjoint_set = DisjointSet(grid.width * grid.height)
 
-    def apply(self):
+    def apply(self) -> None:
         w, h = self.grid.width, self.grid.height
         ds = self.disjoint_set
         edges = []
@@ -53,9 +54,12 @@ class Kruskal(GenerationStrategy):
             if cell_a in self.cells_42 or cell_b in self.cells_42:
                 continue
 
-            if ds.union(idx_a, idx_b):
+            if ds.union(idx_a, idx_b) or (not self.perfect):
                 self.grid.remove_wall(cell_a[0], cell_a[1], wall_a)
                 self.grid.remove_wall(cell_b[0], cell_b[1], wall_b)
-                sleep(0.04)
-                self.viz.render_cells(cell_a[0], cell_a[1])
-                self.viz.render_cells(cell_b[0], cell_b[1])
+                if self.viz and self.vizualize:
+                    sleep(0.04)
+                    self.viz.render_cells(cell_a[0], cell_a[1])
+                    self.viz.render_cells(cell_b[0], cell_b[1])
+        if self.viz and self.vizualize:
+            self.viz.render()
