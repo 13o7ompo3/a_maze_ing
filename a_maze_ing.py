@@ -6,6 +6,7 @@ from mazegen.utils import save_maze
 from mazegen.visualizer import ConsoleVisualizer
 from mazegen.solver import MazeSolver
 import time
+import keyboard
 
 COLORS = [
     "\033[97m",  # White
@@ -65,13 +66,39 @@ def parse_config(filepath: str) -> dict:
     #     close(f)
     # except Exception:
     #     raise ValueError(f"Invalid OUTPUT_FILE name {config['OUTPUT_FILE']}")
-    if not os.access(os.path.dirname(config['OUTPUT_FILE']) or '.', os.W_OK):
-        raise ValueError(f"Cannot write to the directory for {file_path}")
     if 'ALGORITHM' not in config:
         config['ALGORITHM'] = "backtracker"
     if 'STRATEGY' not in config:
         config['STRATEGY'] = "bfs"
     return config
+
+
+def parce_input() -> tuple[tuple[int, int], int, int, int]:
+    pass
+
+
+def player_mode(grid: Grid, viz: ConsoleVisualizer) -> None:
+    break_mode = False
+    os.system('cls' if os.name == 'nt' else 'clear')
+    viz.player = (0, 0)
+    viz.render()
+    print("=== Player Mod ===")
+    print(f"1. {'Hide' if viz.show_path else 'Show'} path")
+    print(f"2. breake mode: {break_mode}")
+    while True:
+        x, y = viz.player
+        c, wall, opp_wall, input = parce_input()
+        if input == 0:
+            cx, cy = c
+            if not (cx < 0 or cy < 0 or cx > grid.height or cy > grid.width
+                    or c in viz.imprint_42):
+                if break_mode:
+                    grid.remove_wall(x, y, wall)
+                    grid.remove_wall(cx, cy, opp_wall)
+                if not (grid.get_value(x, y) & wall):
+                    viz.player = c
+                viz.render_cells(x, y)
+                viz.render_cells(*c)
 
 
 if __name__ == "__main__":
@@ -114,6 +141,7 @@ if __name__ == "__main__":
                 print(f"4. change algorithm : {config['ALGORITHM']}")
                 print(f"5. change strategy : {config['STRATEGY']}")
                 print("6. Solve maze")
+                print("7. Player mode")
                 print("q. Quit")
 
                 choice = input("Choice? (1-5 or q to quit): ").strip()
@@ -144,9 +172,12 @@ if __name__ == "__main__":
                     solution_path = solver.solve(config['ENTRY'], config['EXIT'],
                                          config['STRATEGY'])
                     viz.set_path(solution_path)
+                elif choice == '7':
+                    player_mode(grid, viz)
                 elif choice == 'q':
                     print("Goodbye!")
                     sys.exit(0)
+                
                 else:
                     print("Invalid choice.")
     except BaseException as e:

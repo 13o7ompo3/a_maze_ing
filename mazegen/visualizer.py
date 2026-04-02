@@ -21,6 +21,7 @@ class ConsoleVisualizer:
         self.grid = grid
         self.entry = entry
         self.exit = exit
+        self.player = None
         self.path_coords = set()
         self.show_path = True
         self.color_idx = 0
