@@ -5,17 +5,25 @@ from mazegen.visualizer import ConsoleVisualizer
 
 
 class MazeSolver:
-    def __init__(self, grid: Grid, viz: ConsoleVisualizer):
+    def __init__(self, grid: Grid, entry: tuple, exit: tuple,
+                 viz: ConsoleVisualizer | None = None,
+                 strategy: str = "bfs",
+                 vizualize: bool = True) -> None:
         self.grid = grid
+        self.entry = entry
+        self.exit = exit
         self.viz = viz
+        self.strategy = strategy
+        self.vizualize = vizualize
 
-    def solve(self, entry: tuple, exit: tuple, strategy: str) -> str:
+    def solve(self) -> str:
         statigies = {
             "bfs": BFSSolver,
             "dfs": DFSSolver
         }
-        if strategy not in statigies:
-            raise ValueError(f"Unknown strategy: {strategy}")
-        strategy_class = statigies[strategy]
-        solver = strategy_class(self.grid, entry, exit, self.viz)
+        if self.strategy not in statigies:
+            raise ValueError(f"Unknown strategy: {self.strategy}")
+        strategy_class = statigies[self.strategy]
+        solver = strategy_class(self.grid, self.entry, self.exit, self.viz,
+                                self.vizualize)
         return solver.solve()

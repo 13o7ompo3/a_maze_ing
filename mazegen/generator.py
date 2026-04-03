@@ -35,7 +35,7 @@ class MazeGenerator:
             raise ValueError(f"Unknown algorithm: {self.algorithm_name}")
         strategy_class = strategies[self.algorithm_name]
         strategy = strategy_class(self.grid, self.rng, self.imprint_42,
-                                  self.viz)
+                                  self.viz, self.perfect, self.vizualize)
         self.viz.render()
         strategy.apply()
 

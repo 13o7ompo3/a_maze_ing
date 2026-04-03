@@ -30,7 +30,8 @@ class DFSSolver(SolverStrategy):
                     if (nx, ny) not in visited:
                         visited.add((nx, ny))
                         stack.append((nx, ny, path + move_char))
-                        # sleep(0.03)
-                        self.viz.set_path(path + move_char)
-                        self.viz.render()
+                        if self.viz and self.vizualize:
+                            sleep(0.03)
+                            self.viz.set_path(path + move_char)
+                            self.viz.render()
         return ""

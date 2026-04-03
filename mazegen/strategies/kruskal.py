@@ -37,6 +37,7 @@ class Kruskal(GenerationStrategy):
         w, h = self.grid.width, self.grid.height
         ds = self.disjoint_set
         edges = []
+        rejected_edges = []
 
         for y in range(h):
             for x in range(w):
@@ -54,12 +55,35 @@ class Kruskal(GenerationStrategy):
             if cell_a in self.cells_42 or cell_b in self.cells_42:
                 continue
 
-            if ds.union(idx_a, idx_b) or (not self.perfect):
+            if ds.union(idx_a, idx_b):
                 self.grid.remove_wall(cell_a[0], cell_a[1], wall_a)
                 self.grid.remove_wall(cell_b[0], cell_b[1], wall_b)
                 if self.viz and self.vizualize:
                     sleep(0.04)
                     self.viz.render_cells(cell_a[0], cell_a[1])
                     self.viz.render_cells(cell_b[0], cell_b[1])
-        if self.viz and self.vizualize:
-            self.viz.render()
+            else:
+                rejected_edges.append((cell_a, cell_b, wall_a, wall_b))
+
+        if not self.perfect:
+            p_c = 0.05
+            k = int(p_c * ((w * h) - w - h + 1))
+            self.rng.shuffle(rejected_edges)
+
+            for cell_a, cell_b, wall_a, wall_b in rejected_edges:
+                if k <= 0:
+                    break
+
+                x, y = cell_a
+                nx, ny = cell_b
+
+                if not self._creates_2x2_room(x, y, nx, ny, wall_a):
+
+                    self.grid.remove_wall(x, y, wall_a)
+                    self.grid.remove_wall(nx, ny, wall_b)
+                    k -= 1
+
+                    if self.viz and self.vizualize:
+                        sleep(0.04)
+                        self.viz.render_cells(x, y)
+                        self.viz.render_cells(nx, ny)

@@ -40,26 +40,42 @@ class RecursiveBacktracker(GenerationStrategy):
                         self.viz.render_cells(x, y)
                         self.viz.render_cells(nx, ny)
 
-                    break  # We found a path! Break out of the for-loop.
-
+                    break
             else:
-                stack.pop()  # Dead end hit, remove from stack
+                stack.pop()
 
-                if not self.perfect:
-                    for c, wall, opp_wall in neighbours:
-                        nx, ny = c
-                        if (0 <= nx < self.grid.width
-                            and 0 <= ny < self.grid.height
-                           and c not in self.cells_42):
+        if not self.perfect:
+            w, h = self.grid.width, self.grid.height
+            rejected_edges = []
 
-                            if self.rng.random() < 0.1:
-                                self.grid.remove_wall(x, y, wall)
-                                self.grid.remove_wall(nx, ny, opp_wall)
-                                if self.viz and self.vizualize:
-                                    sleep(0.04)
-                                    self.viz.render_cells(x, y)
-                                    self.viz.render_cells(nx, ny)
-                                break
+            for y in range(h):
+                for x in range(w):
+                    if (x, y) in self.cells_42:
+                        continue
+                    if x < w - 1 and (x + 1, y) not in self.cells_42:
+                        if self.grid.get_value(x, y) & 2:
+                            rejected_edges.append(((x, y), (x + 1, y), 2, 8))
+                    if y < h - 1 and (x, y + 1) not in self.cells_42:
+                        if self.grid.get_value(x, y) & 4:
+                            rejected_edges.append(((x, y), (x, y + 1), 4, 1))
+
+            p_c = 0.05
+            k = int(p_c * ((w * h) - w - h + 1))
+            self.rng.shuffle(rejected_edges)
+
+            for cell_a, cell_b, wall_a, wall_b in rejected_edges:
+                if k <= 0:
+                    break
+                x, y = cell_a
+                nx, ny = cell_b
+                if not self._creates_2x2_room(x, y, nx, ny, wall_a):
+                    self.grid.remove_wall(x, y, wall_a)
+                    self.grid.remove_wall(nx, ny, wall_b)
+                    k -= 1
+                    if self.viz and self.vizualize:
+                        sleep(0.04)
+                        self.viz.render_cells(x, y)
+                        self.viz.render_cells(nx, ny)
 
         if self.viz and self.vizualize:
             self.viz.render()

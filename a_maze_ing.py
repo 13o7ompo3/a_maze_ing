@@ -3,6 +3,7 @@ import os
 from mazegen.grid import Grid
 from mazegen.generator import MazeGenerator
 from mazegen.utils import save_maze
+import shutil
 from mazegen.visualizer import ConsoleVisualizer
 from mazegen.solver import MazeSolver
 import time
@@ -19,6 +20,44 @@ COLORS = [
     "\033[96m",  # Cyan
 ]
 RESET = "\033[0m"
+
+AMAZEING_ART = [
+    "   █████████              ██████   ██████   █████████   ███████████"
+    " ██████████            █████ ██████   █████   █████████ ",
+    "  ███░░░░░███            ░░██████ ██████   ███░░░░░███ ░█░░░░░░███ "
+    "░░███░░░░░█           ░░███ ░░██████ ░░███   ███░░░░░███",
+    " ░███    ░███             ░███░█████░███  ░███    ░███ ░     ███░  "
+    " ░███  █ ░             ░███  ░███░███ ░███  ███     ░░░ ",
+    " ░███████████  ██████████ ░███░░███ ░███  ░███████████      ███    "
+    " ░██████    ██████████ ░███  ░███░░███░███ ░███         ",
+    " ░███░░░░░███ ░░░░░░░░░░  ░███ ░░░  ░███  ░███░░░░░███     ███     "
+    " ░███░░█   ░░░░░░░░░░  ░███  ░███ ░░██████ ░███    █████",
+    " ░███    ░███             ░███      ░███  ░███    ░███   ████     █"
+    " ░███ ░   █            ░███  ░███  ░░█████ ░░███  ░░███ ",
+    " █████   █████            █████     █████ █████   █████ ███████████"
+    " ██████████            █████ █████  ░░█████ ░░█████████ ",
+    "░░░░░   ░░░░░            ░░░░░     ░░░░░ ░░░░░   ░░░░░ ░░░░░░░░░░░ "
+    "░░░░░░░░░░            ░░░░░ ░░░░░    ░░░░░   ░░░░░░░░░  "
+]
+
+YOU_WIN_ART = [
+    " █████ █████                        █████   ███   █████  ███             "
+    "   ███",
+    "░░███ ░░███                        ░░███   ░███  ░░███  ░░░              "
+    "  ░███",
+    " ░░███ ███    ██████  █████ ████    ░███   ░███   ░███  ████  ████████   "
+    "  ░███",
+    "  ░░█████    ███░░███░░███ ░███     ░███   ░███   ░███ ░░███ ░░███░░███  "
+    "  ░███",
+    "   ░░███    ░███ ░███ ░███ ░███     ░░███  █████  ███   ░███  ░███ ░███  "
+    "  ░███",
+    "    ░███    ░███ ░███ ░███ ░███      ░░░█████░█████░    ░███  ░███ ░███  "
+    "  ░░░ ",
+    "    █████   ░░██████  ░░████████       ░░███ ░░███      █████ ████ █████ "
+    "   ███",
+    "   ░░░░░     ░░░░░░    ░░░░░░░░         ░░░   ░░░      ░░░░░ ░░░░ ░░░░░  "
+    "  ░░░ ",
+]
 
 
 def parse_config(filepath: str) -> dict:
@@ -47,9 +86,9 @@ def check_output_file(filepath: str) -> None:
     pass  # to be implemented
 
 
-def check_for_expectedvalue(config: dict, key: str,
+def check_for_expectedvalue(config: dict[str, str], key: str,
                             expected_values: set) -> None:
-    if key in config and config[key].lower() not in expected_values:
+    if key in config and config[key] not in expected_values:
         raise ValueError(f"Invalid value for {key}. "
                          f"Expected one of: {expected_values}")
 
@@ -89,8 +128,8 @@ def parse(filepath: str) -> dict:
     config['PERFECT'] = config.get('PERFECT', 'true').lower() == 'true'
     check_for_expectedvalue(config, 'ALGORITHM', {'backtracker', 'kruskal'})
     check_for_expectedvalue(config, 'STRATEGY', {'bfs', 'dfs'})
-    check_for_expectedvalue(config, 'VIZUALIZE', {'true', 'false'})
-    check_for_expectedvalue(config, 'PERFECT', {'true', 'false'})
+    check_for_expectedvalue(config, 'VIZUALIZE', {True, False})
+    check_for_expectedvalue(config, 'PERFECT', {True, False})
 
     return config
 
@@ -108,7 +147,7 @@ def get_key() -> str:
     return ch
 
 
-def parce_input() -> tuple[tuple[int, int], int, int, int]:
+def parse_input() -> tuple:
     ch = get_key()
 
     c = None
@@ -147,20 +186,19 @@ def parce_input() -> tuple[tuple[int, int], int, int, int]:
 def player_mode(grid: Grid, viz: ConsoleVisualizer) -> None:
     break_mode = False
     exit = False
-    viz.player = (0, 0)
+    viz.player = viz.entry
+    os.system('cls' if os.name == 'nt' else 'clear')
     viz.render()
-    sys.stdout.write("\033[?25l")
-    sys.stdout.flush()
     # Move cursor below the maze to print menu
     while True:
         sys.stdout.write(f"\033[{2 * grid.height + 3};1H")
         print("=== Player Mod ===")
         print(f"1. {'Hide' if viz.show_path else 'Show'} path")
-        print(f"2. breake mode: {break_mode} ")
+        print(f"2. break mode: {break_mode} ")
         print("Press 'q' to quit player mode")
         while True:
             x, y = viz.player
-            c, wall, opp_wall, input_code = parce_input()
+            c, wall, opp_wall, input_code = parse_input()
             if input_code == 0:
                 cx, cy = c
                 cx += x
@@ -175,6 +213,10 @@ def player_mode(grid: Grid, viz: ConsoleVisualizer) -> None:
                         viz.player = (cx, cy)
                     viz.render_cells(x, y)
                     viz.render_cells(cx, cy)
+                if viz.player == viz.exit:
+                    print_art(YOU_WIN_ART)
+                    exit = True
+                    break
             elif input_code == 1:
                 viz.show_path = not viz.show_path
                 viz.render()
@@ -187,47 +229,57 @@ def player_mode(grid: Grid, viz: ConsoleVisualizer) -> None:
                 break
         if exit:
             break
-    sys.stdout.write("\033[?25h")
-    sys.stdout.flush()
     viz.player = None
+
+
+def print_art(art: list[str]) -> None:
+    os.system('cls' if os.name == 'nt' else 'clear')
+    term_w, term_h = shutil.get_terminal_size((120, 30))
+
+    start_y = max(1, term_h // 2 - len(art) // 2)
+    for i, line in enumerate(art):
+        start_x = max(1, term_w // 2 - len(line) // 2)
+        sys.stdout.write(f"\033[{start_y + i};{start_x}H{line}")
+    sys.stdout.flush()
+    time.sleep(5)
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 if __name__ == "__main__":
     try:
         exit = False
-        config = parse_config(sys.argv[1])
+        config = parse(sys.argv[1])
         color_idx = 0
+        seed = config.get('SEED', None)
         os.system('cls' if os.name == 'nt' else 'clear')
         sys.stdout.write("\033[?25l")
         sys.stdout.flush()
+        print_art(AMAZEING_ART)
 
+        grid = Grid(config['WIDTH'], config['HEIGHT'])
+        viz = ConsoleVisualizer(grid, config['ENTRY'],
+                                config['EXIT'])
+        generator = MazeGenerator(grid, config['WIDTH'], config['HEIGHT'],
+                                  viz, seed, config['ALGORITHM'],
+                                  config['PERFECT'], config['VIZUALIZE'])
+        solver = MazeSolver(grid, config['ENTRY'], config['EXIT'], viz,
+                            config['STRATEGY'], config['VIZUALIZE'])
+        viz.imprint_42 = set()
+        viz.color_idx = color_idx
         while True:
-            if 'SEED' not in config:
-                seed = int(time.time() * 1000)
-            else:
-                seed = config['SEED']
-            grid = Grid(config['WIDTH'], config['HEIGHT'])
-            viz = ConsoleVisualizer(grid, config['ENTRY'],
-                                    config['EXIT'])
-            viz.imprint_42 = set()
-            viz.color_idx = color_idx
-            generator = MazeGenerator(grid, config['WIDTH'], config['HEIGHT'],
-                                      viz, seed, config['ALGORITHM'],
-                                      config['PERFECT'], config['VIZUALIZE'])
+            grid.__init__(config['WIDTH'], config['HEIGHT'])
             generator.generate()
-            solver = MazeSolver(grid, viz)
-            solution_path = solver.solve(config['ENTRY'], config['EXIT'],
-                                         config['STRATEGY'])
+            solution_path = solver.solve()
 
             save_maze(grid, config['ENTRY'], config['EXIT'],
                       solution_path, config['OUTPUT_FILE'])
 
             viz.set_path(solution_path)
+            viz.render()
 
             while True:
-                os.system('cls' if os.name == 'nt' else 'clear')
-                viz.render()
-                print("\n=== A-Maze-ing Menu ===")
+                sys.stdout.write(f"\033[{2 * grid.height + 3};1H")
+                print("=== A-Maze-ing Menu ===")
                 print("1. Re-generate new maze")
                 print(f"2. {'Hide' if viz.show_path else 'Show'} path")
                 print("3. Change colors")
@@ -238,21 +290,23 @@ if __name__ == "__main__":
                 print("q. Quit")
 
                 choice = get_key()
-                os.system('cls' if os.name == 'nt' else 'clear')
 
                 if choice == '1':
                     break
                 elif choice == '2':
                     viz.show_path = not viz.show_path
+                    viz.render()
                 elif choice == '3':
                     color_idx = (color_idx + 1) % len(COLORS)
                     viz.color_idx = color_idx
+                    viz.render()
                 elif choice == '4':
                     if config['ALGORITHM'] == 'backtracker':
                         new_algorithm = 'kruskal'
                     elif config['ALGORITHM'] == 'kruskal':
                         new_algorithm = 'backtracker'
                     config['ALGORITHM'] = new_algorithm
+                    generator.algorithm_name = new_algorithm
                 elif choice == '5':
                     if config['STRATEGY'] == 'bfs':
                         new_strategy = 'dfs'
@@ -260,13 +314,16 @@ if __name__ == "__main__":
                         new_strategy = 'bfs'
 
                     config['STRATEGY'] = new_strategy
+                    solver.strategy = new_strategy
                 elif choice == '6':
-                    solution_path = solver.solve(config['ENTRY'],
-                                                 config['EXIT'],
-                                                 config['STRATEGY'])
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    solution_path = solver.solve()
                     viz.set_path(solution_path)
+                    viz.render()
                 elif choice == '7':
                     player_mode(grid, viz)
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    viz.render()
                 elif choice == 'q':
                     exit = True
                     break
