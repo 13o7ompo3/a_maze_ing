@@ -6,6 +6,7 @@ from mazegen.utils import save_maze
 import shutil
 from mazegen.visualizer import ConsoleVisualizer
 from mazegen.solver import MazeSolver
+from mazegen.utils import cell_42
 import time
 import tty
 import termios
@@ -83,7 +84,11 @@ def parse_config(filepath: str) -> dict:
 
 
 def check_output_file(filepath: str) -> None:
-    pass  # to be implemented
+    directory = os.path.dirname(filepath)
+    if directory and not os.path.isdir(directory):
+        raise ValueError(f"Output directory does not exist: {directory}")
+    if not filepath.strip():
+        raise ValueError("OUTPUT_FILE cannot be empty")
 
 
 def check_for_expectedvalue(config: dict[str, str], key: str,
@@ -121,7 +126,22 @@ def parse(filepath: str) -> dict:
 
     # verify output file is valid
     check_output_file(config['OUTPUT_FILE'])
+    w, h = config['WIDTH'], config['HEIGHT']
+    if w <= 0 or h <= 0:
+        raise ValueError("WIDTH and HEIGHT must be positive integers", w, h)
+    for key in ('ENTRY', 'EXIT'):
+        x, y = config[key]
+        if not (0 <= x < w and 0 <= y < h):
+            raise ValueError(
+                f"{key}={config[key]} is outside maze bounds ({w}x{h})"
+            )
+    if config['ENTRY'] == config['EXIT']:
+        raise ValueError("ENTRY and EXIT cannot be the same")
+    cell_42_set = cell_42(w, h)
+    if config['ENTRY'] in cell_42_set or config['EXIT'] in cell_42_set:
+        raise ValueError("ENTRY and EXIT cannot be inside the 42 imprint")
 
+    config['SEED'] = config.get('SEED', None)
     config['ALGORITHM'] = config.get('ALGORITHM', 'backtracker').lower()
     config['STRATEGY'] = config.get('STRATEGY', 'bfs').lower()
     config['VIZUALIZE'] = config.get('VIZUALIZE', 'true').lower() == 'true'
@@ -153,7 +173,7 @@ def parse_input() -> tuple:
     c = None
     wall = None
     opp_wall = None
-    return_code = None
+    return_code = 0
 
     if ch == '\x1b[A':
         c = (0, -1)
@@ -177,8 +197,6 @@ def parse_input() -> tuple:
         return_code = 2
     elif ch == 'q':
         return_code = 3
-    if c is not None:
-        return_code = 0
 
     return c, wall, opp_wall, return_code
 
@@ -261,13 +279,16 @@ if __name__ == "__main__":
                                 config['EXIT'])
         generator = MazeGenerator(grid, config['WIDTH'], config['HEIGHT'],
                                   viz, seed, config['ALGORITHM'],
+                                  cell_42(config['WIDTH'], config['HEIGHT']),
                                   config['PERFECT'], config['VIZUALIZE'])
         solver = MazeSolver(grid, config['ENTRY'], config['EXIT'], viz,
                             config['STRATEGY'], config['VIZUALIZE'])
         viz.imprint_42 = set()
         viz.color_idx = color_idx
         while True:
-            grid.__init__(config['WIDTH'], config['HEIGHT'])
+            grid.cells = [15] * (grid.width * grid.height)
+            viz.set_path("")
+            viz.render()
             generator.generate()
             solution_path = solver.solve()
 
@@ -287,6 +308,7 @@ if __name__ == "__main__":
                 print(f"5. change strategy : {config['STRATEGY']}")
                 print("6. Solve maze")
                 print("7. Player mode")
+                print(f"8. Animation : {config['VIZUALIZE']} ")
                 print("q. Quit")
 
                 choice = get_key()
@@ -316,7 +338,9 @@ if __name__ == "__main__":
                     config['STRATEGY'] = new_strategy
                     solver.strategy = new_strategy
                 elif choice == '6':
-                    os.system('cls' if os.name == 'nt' else 'clear')
+                    # os.system('cls' if os.name == 'nt' else 'clear')
+                    viz.set_path("")
+                    viz.render()
                     solution_path = solver.solve()
                     viz.set_path(solution_path)
                     viz.render()
@@ -324,6 +348,10 @@ if __name__ == "__main__":
                     player_mode(grid, viz)
                     os.system('cls' if os.name == 'nt' else 'clear')
                     viz.render()
+                elif choice == '8':
+                    config['VIZUALIZE'] = not config['VIZUALIZE']
+                    generator.vizualize = config['VIZUALIZE']
+                    solver.vizualize = config['VIZUALIZE']
                 elif choice == 'q':
                     exit = True
                     break

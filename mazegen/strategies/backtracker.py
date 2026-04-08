@@ -6,13 +6,16 @@ from mazegen.visualizer import ConsoleVisualizer
 
 
 class RecursiveBacktracker(GenerationStrategy):
-    def __init__(self, grid: Grid, rng: Random, cells_42: set,
-                 viz: ConsoleVisualizer = None, perfect: bool = True,
+    def __init__(self, grid: Grid, rng: Random,
+                 viz: ConsoleVisualizer | None = None,
+                 shape: set[tuple[int, int]] | None = None,
+                 perfect: bool = True,
                  vizualize: bool = True):
-        super().__init__(grid, rng, cells_42, viz, perfect, vizualize)
-        self.visited = set()
+        super().__init__(grid, rng, viz, perfect, vizualize)
+        self.visited: set[tuple[int, int]] = set()
+        self.shape: set[tuple[int, int]] | None = shape
 
-    def apply(self, start_x=0, start_y=0):
+    def apply(self, start_x: int = 0, start_y: int = 0) -> None:
         stack = [(start_x, start_y)]
         self.visited.add((start_x, start_y))
 
@@ -28,7 +31,8 @@ class RecursiveBacktracker(GenerationStrategy):
 
                 # If valid and unvisited...
                 if (0 <= nx < self.grid.width and 0 <= ny < self.grid.height
-                   and c not in self.visited and c not in self.cells_42):
+                   and c not in self.visited and
+                   ((c not in self.shape) if self.shape else True)):
 
                     self.grid.remove_wall(x, y, wall)
                     self.grid.remove_wall(nx, ny, opp_wall)
@@ -50,12 +54,14 @@ class RecursiveBacktracker(GenerationStrategy):
 
             for y in range(h):
                 for x in range(w):
-                    if (x, y) in self.cells_42:
+                    if self.shape and (x, y) in self.shape:
                         continue
-                    if x < w - 1 and (x + 1, y) not in self.cells_42:
+                    if x < w - 1 and (not self.shape or
+                                      (x + 1, y) not in self.shape):
                         if self.grid.get_value(x, y) & 2:
                             rejected_edges.append(((x, y), (x + 1, y), 2, 8))
-                    if y < h - 1 and (x, y + 1) not in self.cells_42:
+                    if y < h - 1 and (not self.shape or
+                                      (x, y + 1) not in self.shape):
                         if self.grid.get_value(x, y) & 4:
                             rejected_edges.append(((x, y), (x, y + 1), 4, 1))
 
@@ -76,6 +82,3 @@ class RecursiveBacktracker(GenerationStrategy):
                         sleep(0.04)
                         self.viz.render_cells(x, y)
                         self.viz.render_cells(nx, ny)
-
-        if self.viz and self.vizualize:
-            self.viz.render()

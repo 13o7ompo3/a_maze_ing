@@ -17,17 +17,18 @@ RESET = "\033[0m"
 
 
 class ConsoleVisualizer:
-    def __init__(self, grid: Grid, entry: tuple, exit: tuple):
-        self.grid = grid
-        self.entry = entry
-        self.exit = exit
-        self.player = None
-        self.path_coords = set()
-        self.show_path = True
-        self.color_idx = 0
-        self.imprint_42 = set()
+    def __init__(self, grid: Grid, entry: tuple[int, int],
+                 exit: tuple[int, int]):
+        self.grid: Grid = grid
+        self.entry: tuple[int, int] = entry
+        self.exit: tuple[int, int] = exit
+        self.player: tuple[int, int] | None = None
+        self.path_coords: set[tuple[int, int]] = set()
+        self.show_path: bool = True
+        self.color_idx: int = 0
+        self.imprint_42: set[tuple[int, int]] = set()
 
-    def set_path(self, path_str: str):
+    def set_path(self, path_str: str) -> None:
         """Converts NNSSWE string to coordinates for display"""
         x, y = self.entry
         self.path_coords = {(x, y)}
@@ -42,18 +43,17 @@ class ConsoleVisualizer:
                 x -= 1
             self.path_coords.add((x, y))
 
-    def render(self):
+    def render(self) -> None:
         """Draws the maze using ASCII characters"""
-        # os.system('cls' if os.name == 'nt' else 'clear')
-        sys.stdout.write("\033[H")
+        os.system('cls' if os.name == 'nt' else 'clear')
+        # sys.stdout.write("\033[H")
 
-        wall_color = COLORS[self.color_idx]
         print(f"MAZE VISUALIZATION ({self.grid.width}x{self.grid.height})")
         for y in range(self.grid.height):
             for x in range(self.grid.width):
                 self.render_cells(x, y)
 
-    def render_cells(self, x: int, y: int):
+    def render_cells(self, x: int, y: int) -> None:
         """Render a specific cell in the maze"""
         val = self.grid.get_value(x, y)
         wall_color = COLORS[self.color_idx]

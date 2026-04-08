@@ -6,18 +6,17 @@ from time import sleep
 
 
 class GenerationStrategy(ABC):
-    def __init__(self, grid: Grid, rng: Random, cells_42: set,
-                 viz: ConsoleVisualizer = None, perfect: bool = True,
+    def __init__(self, grid: Grid, rng: Random,
+                 viz: ConsoleVisualizer | None = None, perfect: bool = True,
                  vizualize: bool = True):
         self.grid = grid
         self.rng = rng
-        self.cells_42 = cells_42
         self.viz = viz
         self.perfect = perfect
         self.vizualize = vizualize
 
     @abstractmethod
-    def apply(self):
+    def apply(self) -> None:
         pass
 
     def imperfect_maze(self, rejected_edges: list) -> None:
@@ -67,8 +66,13 @@ class GenerationStrategy(ABC):
             bool: True if the 2x2 room is created, False otherwise
 
         How it works:
-        - Depending on the wall being removed, we check the adjacent cells to see if they form a 2x2 room.
-        - For example, if we're removing a vertical wall (wall == 2), we check the cells above and below the two cells. If both pairs of cells have no wall between them, then we have a 2x2 room.
+        - Depending on the wall being removed,
+        we check the adjacent cells to see
+        if they form a 2x2 room.
+        - For example, if we're removing a vertical wall (wall == 2),
+        we check the cells above and below the two cells.
+        If both pairs of cells have no wall between them,
+        then we have a 2x2 room.
         """
         gv = self.grid.get_value
         w, h = self.grid.width, self.grid.height
@@ -114,8 +118,9 @@ class GenerationStrategy(ABC):
 
 
 class SolverStrategy(ABC):
-    def __init__(self, grid: Grid, entry: tuple, exit: tuple,
-                 viz: ConsoleVisualizer = None,
+    def __init__(self, grid: Grid, entry: tuple[int, int],
+                 exit: tuple[int, int],
+                 viz: ConsoleVisualizer | None = None,
                  vizualize: bool = True) -> None:
         self.grid = grid
         self.entry = entry

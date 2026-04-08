@@ -6,16 +6,16 @@ from time import sleep
 
 
 class DisjointSet:
-    def __init__(self, size):
+    def __init__(self, size: int) -> None:
         self.parent = list(range(size))
 
-    def find(self, i):
+    def find(self, i: int) -> int:
         """Find the representative (root) of the set containing i"""
         if self.parent[i] != i:
             self.parent[i] = self.find(self.parent[i])
         return self.parent[i]
 
-    def union(self, i, j):
+    def union(self, i: int, j: int) -> bool:
         """Merge the sets containing i and j"""
         root_i = self.find(i)
         root_j = self.find(j)
@@ -27,11 +27,14 @@ class DisjointSet:
 
 
 class Kruskal(GenerationStrategy):
-    def __init__(self, grid: Grid, rng: Random, cells_42: set,
-                 viz: ConsoleVisualizer = None, perfect: bool = True,
+    def __init__(self, grid: Grid, rng: Random,
+                 viz: ConsoleVisualizer | None = None,
+                 shape: set[tuple[int, int]] | None = None,
+                 perfect: bool = True,
                  vizualize: bool = True) -> None:
-        super().__init__(grid, rng, cells_42, viz, perfect, vizualize)
+        super().__init__(grid, rng, viz, perfect, vizualize)
         self.disjoint_set = DisjointSet(grid.width * grid.height)
+        self.shape = shape
 
     def apply(self) -> None:
         w, h = self.grid.width, self.grid.height
@@ -52,7 +55,7 @@ class Kruskal(GenerationStrategy):
             idx_a = self.grid.get_index(*cell_a)
             idx_b = self.grid.get_index(*cell_b)
 
-            if cell_a in self.cells_42 or cell_b in self.cells_42:
+            if self.shape and (cell_a in self.shape or cell_b in self.shape):
                 continue
 
             if ds.union(idx_a, idx_b):

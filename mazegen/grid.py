@@ -10,7 +10,7 @@ class Grid:
     def get_value(self, x: int, y: int) -> int:
         return self.cells[self.get_index(x, y)]
 
-    def remove_wall(self, x: int, y: int, direction: int):
+    def remove_wall(self, x: int, y: int, direction: int) -> None:
         # direction: 1=N, 2=E, 4=S, 8=W
         idx = self.get_index(x, y)
         self.cells[idx] &= ~direction  # Turn off the bit
