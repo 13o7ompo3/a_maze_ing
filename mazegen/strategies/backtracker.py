@@ -6,16 +6,71 @@ from mazegen.visualizer import ConsoleVisualizer
 
 
 class RecursiveBacktracker(GenerationStrategy):
+    """Implement the Recursive Backtracker algorithm for maze generation.
+
+    Inherits from GenerationStrategy and uses a randomized depth-first search
+    (DFS) approach to carve out paths, avoiding cells defined in the
+    exclusion shape.
+    """
+
     def __init__(self, grid: Grid, rng: Random,
                  viz: ConsoleVisualizer | None = None,
                  shape: set[tuple[int, int]] | None = None,
                  perfect: bool = True,
                  vizualize: bool = True):
+        """Initialize the RecursiveBacktracker generation strategy.
+
+        Args:
+            grid (Grid): The maze grid object to be populated.
+            rng (Random): The random number generator instance.
+            viz (ConsoleVisualizer | None, optional): The visualizer object
+                for rendering. Defaults to None.
+            shape (set[tuple[int, int]] | None, optional): Coordinates to
+                exclude from path generation. Defaults to None.
+            perfect (bool, optional): Whether to generate a perfect maze
+                (no loops). Defaults to True.
+            vizualize (bool, optional): Whether to enable visualization.
+                Defaults to True.
+        """
         super().__init__(grid, rng, viz, perfect, vizualize)
+        if shape is not None:
+            if not isinstance(shape, set):
+                raise TypeError("Expected set or None for shape, "
+                                f"got {type(shape).__name__}")
+            for item in shape:
+                if (not isinstance(item, tuple) or len(item) != 2 or
+                        not isinstance(item[0], int) or
+                        not isinstance(item[1], int)):
+                    raise TypeError("Expected set of tuples of two integers "
+                                    "for shape")
         self.visited: set[tuple[int, int]] = set()
         self.shape: set[tuple[int, int]] | None = shape
 
     def apply(self, start_x: int = 0, start_y: int = 0) -> None:
+        """Apply the recursive backtracker algorithm to generate the maze.
+
+        Uses a stack to iteratively carve paths through the grid. At each step,
+        it selects a random unvisited neighbor, removes the wall between them,
+        and pushes the new cell onto the stack. If no unvisited neighbors are
+        available, it backtracks by popping the stack. If an imperfect maze is
+        requested, it subsequently removes additional walls to create loops.
+
+        Args:
+            start_x (int, optional): The starting x-coordinate for
+                generation. Defaults to 0.
+            start_y (int, optional): The starting y-coordinate for
+                generation. Defaults to 0.
+        """
+        if not isinstance(start_x, int):
+            raise TypeError("Expected int for start_x, "
+                            f"got {type(start_x).__name__}")
+        if not isinstance(start_y, int):
+            raise TypeError("Expected int for start_y, "
+                            f"got {type(start_y).__name__}")
+        if start_x < 0 or start_y < 0:
+            raise ValueError("Coordinates start_x and start_y cannot "
+                             "be negative")
+
         stack = [(start_x, start_y)]
         self.visited.add((start_x, start_y))
 

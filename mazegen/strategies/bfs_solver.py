@@ -4,7 +4,23 @@ from mazegen.strategies.base import SolverStrategy
 
 
 class BFSSolver(SolverStrategy):
+    """Implement the Breadth-First Search (BFS) algorithm for solving mazes.
+
+    Inherits from SolverStrategy and uses a queue-based approach to explore
+    the shortest path from the entry to the exit in an unweighted grid.
+    """
     def solve(self) -> str:
+        """Solve the maze using Breadth-First Search.
+
+        Explores the maze grid starting from the entry point, enqueuing
+        valid moves to find the shortest path. Updates the visualizer if
+        visualization is enabled.
+
+        Returns:
+            str: A string of directional characters ('N', 'S', 'E', 'W')
+                representing the path from entry to exit. Returns an
+                empty string if no path is found.
+        """
         queue = deque([(self.entry[0], self.entry[1], "")])
         visited = {self.entry}
 

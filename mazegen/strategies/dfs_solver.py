@@ -3,7 +3,25 @@ from time import sleep
 
 
 class DFSSolver(SolverStrategy):
+    """Implement the Depth-First Search (DFS) algorithm for solving mazes.
+
+    Inherits from SolverStrategy and uses a stack-based approach to
+    deeply explore paths before backtracking to find a route from
+    the entry to the exit.
+    """
+
     def solve(self) -> str:
+        """Solve the maze using Depth-First Search.
+
+        Explores the maze grid starting from the entry point, pushing
+        valid moves onto a stack. If visualization is enabled, it updates
+        the visualizer to show the exploration path.
+
+        Returns:
+            str: A string of directional characters ('N', 'S', 'E', 'W')
+                representing the path from entry to exit. Returns an
+                empty string if no path is found.
+        """
         stack = [(self.entry[0], self.entry[1], "")]
         visited = {self.entry}
 

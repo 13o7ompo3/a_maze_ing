@@ -6,9 +6,42 @@ from time import sleep
 
 
 class GenerationStrategy(ABC):
+    """Define the base interface for maze generation strategies.
+
+    This abstract base class establishes the common properties and methods
+    required for any algorithm that generates mazes within the grid.
+    """
+
     def __init__(self, grid: Grid, rng: Random,
                  viz: ConsoleVisualizer | None = None, perfect: bool = True,
                  vizualize: bool = True):
+        """Initialize the base GenerationStrategy.
+
+        Args:
+            grid (Grid): The maze grid object to be manipulated.
+            rng (Random): The random number generator instance.
+            viz (ConsoleVisualizer | None, optional): The visualizer object
+                for rendering. Defaults to None.
+            perfect (bool, optional): Whether to generate a perfect maze
+                (no loops). Defaults to True.
+            vizualize (bool, optional): Whether to enable visualization.
+                Defaults to True.
+        """
+        if not isinstance(grid, Grid):
+            raise TypeError("Expected Grid for grid, "
+                            f"got {type(grid).__name__}")
+        if not isinstance(rng, Random):
+            raise TypeError("Expected Random for rng, "
+                            f"got {type(rng).__name__}")
+        if viz is not None and not isinstance(viz, ConsoleVisualizer):
+            raise TypeError("Expected ConsoleVisualizer or None for viz, "
+                            f"got {type(viz).__name__}")
+        if not isinstance(perfect, bool):
+            raise TypeError("Expected bool for perfect, "
+                            f"got {type(perfect).__name__}")
+        if not isinstance(vizualize, bool):
+            raise TypeError("Expected bool for vizualize, "
+                            f"got {type(vizualize).__name__}")
         self.grid = grid
         self.rng = rng
         self.viz = viz
@@ -17,9 +50,32 @@ class GenerationStrategy(ABC):
 
     @abstractmethod
     def apply(self) -> None:
+        """Apply the maze generation algorithm to the grid.
+
+        Subclasses must override this method to implement their specific
+        maze generation logic.
+        """
         pass
 
-    def imperfect_maze(self, rejected_edges: list) -> None:
+    def imperfect_maze(self, rejected_edges: list[tuple[
+            tuple[int, int], tuple[int, int], int, int]]) -> None:
+        """Introduce loops into the maze to make it imperfect.
+
+        Randomly removes a percentage of rejected walls (edges) to create
+        loops, ensuring that no 2x2 open rooms are formed in the process.
+
+        Args:
+            rejected_edges (list): A list of tuples containing the
+                rejected walls and cells during the perfect maze
+                generation process.
+        """
+        if not isinstance(rejected_edges, list):
+            raise TypeError("Expected list for rejected_edges, "
+                            f"got {type(rejected_edges).__name__}")
+        if not all(isinstance(edge, tuple) and len(edge) == 4
+                   for edge in rejected_edges):
+            raise TypeError("Expected list of tuples of length 4 for "
+                            "rejected_edges")
         w, h = self.grid.width, self.grid.height
         p_c = 0.05
         k = int(p_c * ((w * h) - w - h + 1))
@@ -45,10 +101,13 @@ class GenerationStrategy(ABC):
 
     def _creates_2x2_room(self, x: int, y: int, nx: int, ny: int,
                           wall: int) -> bool:
-        """
-    Check if removing the wall between (x, y) and (nx, ny) creates a 2x2 room.
+        """Check if removing the wall between (x, y) and (nx, ny) creates a
+        2x2 room.
 
-        example of a 2x2 room:
+        Depending on the wall being removed, it checks the adjacent cells
+        to see if they form a 2x2 room (e.g. if removing a vertical wall,
+        it checks the cells above and below the two cells).
+        Example of a 2x2 room:
         +---+---+
         |   |   |
         +---+---+
@@ -56,24 +115,31 @@ class GenerationStrategy(ABC):
         +---+---+
 
         Args:
-            x (int): x coordinate of the first cell
-            y (int): y coordinate of the first cell
-            nx (int): x coordinate of the second cell
-            ny (int): y coordinate of the second cell
-            wall (int): wall to remove
+            x (int): The x-coordinate of the first cell.
+            y (int): The y-coordinate of the first cell.
+            nx (int): The x-coordinate of the second cell.
+            ny (int): The y-coordinate of the second cell.
+            wall (int): The bitmask value of the wall to remove.
 
         Returns:
-            bool: True if the 2x2 room is created, False otherwise
-
-        How it works:
-        - Depending on the wall being removed,
-        we check the adjacent cells to see
-        if they form a 2x2 room.
-        - For example, if we're removing a vertical wall (wall == 2),
-        we check the cells above and below the two cells.
-        If both pairs of cells have no wall between them,
-        then we have a 2x2 room.
+            bool: True if a 2x2 room is created, False otherwise.
         """
+        if not isinstance(x, int):
+            raise TypeError(f"Expected int for x, got {type(x).__name__}")
+        if not isinstance(y, int):
+            raise TypeError(f"Expected int for y, got {type(y).__name__}")
+        if not isinstance(nx, int):
+            raise TypeError(f"Expected int for nx, got {type(nx).__name__}")
+        if not isinstance(ny, int):
+            raise TypeError(f"Expected int for ny, got {type(ny).__name__}")
+        if not isinstance(wall, int):
+            raise TypeError("Expected int for wall, "
+                            f"got {type(wall).__name__}")
+        if x < 0 or y < 0 or nx < 0 or ny < 0:
+            raise ValueError("Coordinates cannot be negative")
+        if wall not in {1, 2, 4, 8}:
+            raise ValueError(f"Invalid wall bitmask: {wall}. "
+                             "Expected 1, 2, 4, or 8.")
         gv = self.grid.get_value
         w, h = self.grid.width, self.grid.height
 
@@ -118,10 +184,54 @@ class GenerationStrategy(ABC):
 
 
 class SolverStrategy(ABC):
+    """Define the base interface for maze solving strategies.
+
+    This abstract base class establishes the common properties and methods
+    required for any algorithm that solves mazes.
+    """
+
     def __init__(self, grid: Grid, entry: tuple[int, int],
                  exit: tuple[int, int],
                  viz: ConsoleVisualizer | None = None,
                  vizualize: bool = True) -> None:
+        """Initialize the base SolverStrategy.
+
+        Args:
+            grid (Grid): The maze grid object to be solved.
+            entry (tuple[int, int]): The (x, y) coordinates of the
+                maze entry point.
+            exit (tuple[int, int]): The (x, y) coordinates of the
+                maze exit point.
+            viz (ConsoleVisualizer | None, optional): The visualizer object
+                for rendering. Defaults to None.
+            vizualize (bool, optional): Whether to enable visualization.
+                Defaults to True.
+        """
+        if not isinstance(grid, Grid):
+            raise TypeError("Expected Grid for grid, "
+                            f"got {type(grid).__name__}")
+        if not isinstance(entry, tuple):
+            raise TypeError("Expected tuple for entry, "
+                            f"got {type(entry).__name__}")
+        if not isinstance(exit, tuple):
+            raise TypeError("Expected tuple for exit, "
+                            f"got {type(exit).__name__}")
+        if viz is not None and not isinstance(viz, ConsoleVisualizer):
+            raise TypeError("Expected ConsoleVisualizer or None for viz, "
+                            f"got {type(viz).__name__}")
+        if not isinstance(vizualize, bool):
+            raise TypeError("Expected bool for vizualize, "
+                            f"got {type(vizualize).__name__}")
+        if (len(entry) != 2 or not isinstance(entry[0], int) or
+                not isinstance(entry[1], int)):
+            raise ValueError("entry must be a tuple of two integers")
+        if (len(exit) != 2 or not isinstance(exit[0], int) or
+                not isinstance(exit[1], int)):
+            raise ValueError("exit must be a tuple of two integers")
+        if entry[0] < 0 or entry[1] < 0:
+            raise ValueError("entry coordinates cannot be negative")
+        if exit[0] < 0 or exit[1] < 0:
+            raise ValueError("exit coordinates cannot be negative")
         self.grid = grid
         self.entry = entry
         self.exit = exit
@@ -130,4 +240,13 @@ class SolverStrategy(ABC):
 
     @abstractmethod
     def solve(self) -> str:
+        """Execute the maze solving algorithm.
+
+        Subclasses must override this method to implement their specific
+        maze solving logic.
+
+        Returns:
+            str: A string of directional characters ('N', 'S', 'E', 'W')
+                representing the solution path.
+        """
         pass

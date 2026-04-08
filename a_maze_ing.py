@@ -62,6 +62,21 @@ YOU_WIN_ART = [
 
 
 def parse_config(filepath: str) -> dict:
+    """Parse a configuration file into a dictionary.
+
+    Reads a file line by line, ignoring empty lines and comments
+    (starting with '#'). Splits each valid line by '=' to extract
+    key-value pairs.
+
+    Args:
+        filepath (str): The path to the configuration file.
+
+    Returns:
+        dict: A dictionary containing the parsed configuration keys and values.
+
+    Raises:
+        ValueError: If a line has a bad format or if a duplicated key is found.
+    """
     config = {}
     with open(filepath, 'r') as f:
         for line in f:
@@ -84,6 +99,17 @@ def parse_config(filepath: str) -> dict:
 
 
 def check_output_file(filepath: str) -> None:
+    """Check if the given output file path is valid.
+
+    Verifies that the directory of the file path exists and that the file path
+    is not empty.
+
+    Args:
+        filepath (str): The path to the output file to check.
+
+    Raises:
+        ValueError: If the directory does not exist or the filepath is empty.
+    """
     directory = os.path.dirname(filepath)
     if directory and not os.path.isdir(directory):
         raise ValueError(f"Output directory does not exist: {directory}")
@@ -93,12 +119,40 @@ def check_output_file(filepath: str) -> None:
 
 def check_for_expectedvalue(config: dict[str, str], key: str,
                             expected_values: set) -> None:
+    """Check if a specific configuration key has an expected value.
+
+    Args:
+        config (dict[str, str]): The configuration dictionary.
+        key (str): The configuration key to check.
+        expected_values (set): A set of valid values for the given key.
+
+    Raises:
+        ValueError: If the key exists in the config but its value is not
+            in expected_values.
+    """
     if key in config and config[key] not in expected_values:
         raise ValueError(f"Invalid value for {key}. "
                          f"Expected one of: {expected_values}")
 
 
 def parse(filepath: str) -> dict:
+    """Parse and validate the configuration file for the maze generator.
+
+    Loads the configuration using `parse_config` and validates all required
+    and optional keys. It ensures that dimensions and coordinates are valid
+    integers, and applies default values where optional keys are missing.
+
+    Args:
+        filepath (str): The path to the configuration file.
+
+    Returns:
+        dict: A fully validated and populated configuration dictionary.
+
+    Raises:
+        ValueError: If mandatory keys are missing, invalid keys are present,
+            or any value fails validation (e.g., non-integers for dimensions,
+            out of bounds coordinates, entry/exit conflicts).
+    """
     config = {}
     required_keys = {"WIDTH", "HEIGHT", "ENTRY", "EXIT", "OUTPUT_FILE",
                      "PERFECT"}
@@ -155,6 +209,14 @@ def parse(filepath: str) -> dict:
 
 
 def get_key() -> str:
+    """Read a single keypress from the standard input.
+
+    Uses `tty` and `termios` to read a character without waiting for the Enter
+    key. It also handles escape sequences for arrow keys.
+
+    Returns:
+        str: The character or escape sequence read from standard input.
+    """
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -168,6 +230,19 @@ def get_key() -> str:
 
 
 def parse_input() -> tuple:
+    """Parse the user's keypress into a maze movement or menu action.
+
+    Maps arrow keys to movement directions and walls. Maps specific characters
+    ('1', '2', 'q') to menu return codes.
+
+    Returns:
+        tuple: A tuple containing:
+            - c (tuple | None): The coordinate change (dx, dy) for movement.
+            - wall (int | None): The wall bitmask value for the current cell.
+            - opp_wall (int | None): The wall bitmask value for the
+                adjacent cell.
+            - return_code (int): A code representing a menu action.
+    """
     ch = get_key()
 
     c = None
@@ -202,6 +277,16 @@ def parse_input() -> tuple:
 
 
 def player_mode(grid: Grid, viz: ConsoleVisualizer) -> None:
+    """Execute the interactive player mode for solving the maze.
+
+    Allows the user to manually navigate through the maze using arrow keys,
+    toggle the path visibility, and enable 'break mode' to break through walls.
+    The mode ends when the user reaches the exit or chooses to quit.
+
+    Args:
+        grid (Grid): The maze grid object.
+        viz (ConsoleVisualizer): The visualizer object for rendering the maze.
+    """
     break_mode = False
     exit = False
     viz.player = viz.entry
@@ -251,6 +336,15 @@ def player_mode(grid: Grid, viz: ConsoleVisualizer) -> None:
 
 
 def print_art(art: list[str]) -> None:
+    """Print ASCII art centered in the terminal.
+
+    Clears the terminal, calculates the center position based on the terminal
+    size, and prints each line of the provided ASCII art. Pauses for 5 seconds
+    before clearing the screen again.
+
+    Args:
+        art (list[str]): A list of strings representing the ASCII art lines.
+    """
     os.system('cls' if os.name == 'nt' else 'clear')
     term_w, term_h = shutil.get_terminal_size((120, 30))
 
