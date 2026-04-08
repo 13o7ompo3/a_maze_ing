@@ -7,7 +7,7 @@ from mazegen.visualizer import ConsoleVisualizer
 
 class MazeGenerator:
     def __init__(self, grid: Grid, width: int, height: int,
-                 viz: ConsoleVisualizer | None = None, seed: str | None = None,
+                 viz: ConsoleVisualizer | None = None, seed: str | int | None = None,
                  algorithm_name: str = "backtracker",
                  shape: set[tuple[int, int]] | None = None,
                  perfect: bool = True, vizualize: bool = True):
@@ -15,7 +15,9 @@ class MazeGenerator:
         self.height = height
         self.grid = grid
         self.shape: set[tuple[int, int]] | None = shape
-        self.rng = random.Random(seed) if seed is not None else random.Random()
+        self.rng = random.Random()
+        if seed is not None:
+            self.rng.seed(seed)
         self.algorithm_name = algorithm_name
         self.viz = viz
         self.perfect = perfect
@@ -23,7 +25,7 @@ class MazeGenerator:
 
     def generate(self) -> None:
         if self.viz:
-            self.viz.imprint_42 = self.shape if self.shape else set()
+            self.viz.shape = self.shape if self.shape else set()
         strategies = {
             "backtracker": RecursiveBacktracker,
             "kruskal": Kruskal,

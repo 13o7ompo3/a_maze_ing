@@ -26,7 +26,7 @@ class ConsoleVisualizer:
         self.path_coords: set[tuple[int, int]] = set()
         self.show_path: bool = True
         self.color_idx: int = 0
-        self.imprint_42: set[tuple[int, int]] = set()
+        self.shape: set[tuple[int, int]] = set()
 
     def set_path(self, path_str: str) -> None:
         """Converts NNSSWE string to coordinates for display"""
@@ -92,7 +92,7 @@ class ConsoleVisualizer:
         elif self.show_path and (x, y) in self.path_coords:
             mid_line += f"{COLORS[len(COLORS) - 2 - self.color_idx]}"
             mid_line += f"███{RESET}"
-        elif (x, y) in self.imprint_42:
+        elif (x, y) in self.shape:
             mid_line += f"{COLORS[len(COLORS) - 1 - self.color_idx]}"
             mid_line += f"███{RESET}"
         else:

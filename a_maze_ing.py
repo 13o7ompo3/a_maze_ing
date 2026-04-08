@@ -223,7 +223,7 @@ def player_mode(grid: Grid, viz: ConsoleVisualizer) -> None:
                 cy += y
                 if not (cx < 0 or cy < 0 or
                         cx >= grid.width or cy >= grid.height
-                        or (cx, cy) in viz.imprint_42):
+                        or (cx, cy) in viz.shape):
                     if break_mode:
                         grid.remove_wall(x, y, wall)
                         grid.remove_wall(cx, cy, opp_wall)
@@ -268,7 +268,6 @@ if __name__ == "__main__":
         exit = False
         config = parse(sys.argv[1])
         color_idx = 0
-        seed = config.get('SEED', None)
         os.system('cls' if os.name == 'nt' else 'clear')
         sys.stdout.write("\033[?25l")
         sys.stdout.flush()
@@ -278,24 +277,22 @@ if __name__ == "__main__":
         viz = ConsoleVisualizer(grid, config['ENTRY'],
                                 config['EXIT'])
         generator = MazeGenerator(grid, config['WIDTH'], config['HEIGHT'],
-                                  viz, seed, config['ALGORITHM'],
+                                  viz, config['SEED'], config['ALGORITHM'],
                                   cell_42(config['WIDTH'], config['HEIGHT']),
                                   config['PERFECT'], config['VIZUALIZE'])
         solver = MazeSolver(grid, config['ENTRY'], config['EXIT'], viz,
                             config['STRATEGY'], config['VIZUALIZE'])
-        viz.imprint_42 = set()
         viz.color_idx = color_idx
         while True:
+            generator.rng.seed(config['SEED'])
             grid.cells = [15] * (grid.width * grid.height)
             viz.set_path("")
             viz.render()
             generator.generate()
             solution_path = solver.solve()
-
+            viz.set_path(solution_path)
             save_maze(grid, config['ENTRY'], config['EXIT'],
                       solution_path, config['OUTPUT_FILE'])
-
-            viz.set_path(solution_path)
             viz.render()
 
             while True:

@@ -65,20 +65,4 @@ class RecursiveBacktracker(GenerationStrategy):
                         if self.grid.get_value(x, y) & 4:
                             rejected_edges.append(((x, y), (x, y + 1), 4, 1))
 
-            p_c = 0.05
-            k = int(p_c * ((w * h) - w - h + 1))
-            self.rng.shuffle(rejected_edges)
-
-            for cell_a, cell_b, wall_a, wall_b in rejected_edges:
-                if k <= 0:
-                    break
-                x, y = cell_a
-                nx, ny = cell_b
-                if not self._creates_2x2_room(x, y, nx, ny, wall_a):
-                    self.grid.remove_wall(x, y, wall_a)
-                    self.grid.remove_wall(nx, ny, wall_b)
-                    k -= 1
-                    if self.viz and self.vizualize:
-                        sleep(0.04)
-                        self.viz.render_cells(x, y)
-                        self.viz.render_cells(nx, ny)
+            self.imperfect_maze(rejected_edges)

@@ -7,5 +7,4 @@ PERFECT=False
 VIZUALIZE=False
 ALGORITHM=kruskal
 STRATEGY=dfs
-
-SEED=42
+SEED=hello
