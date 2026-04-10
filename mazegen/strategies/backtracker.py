@@ -46,7 +46,7 @@ class RecursiveBacktracker(GenerationStrategy):
         self.visited: set[tuple[int, int]] = set()
         self.shape: set[tuple[int, int]] | None = shape
 
-    def apply(self, start_x: int = 0, start_y: int = 0) -> None:
+    def apply(self) -> None:
         """Apply the recursive backtracker algorithm to generate the maze.
 
         Uses a stack to iteratively carve paths through the grid. At each step,
@@ -54,25 +54,10 @@ class RecursiveBacktracker(GenerationStrategy):
         and pushes the new cell onto the stack. If no unvisited neighbors are
         available, it backtracks by popping the stack. If an imperfect maze is
         requested, it subsequently removes additional walls to create loops.
-
-        Args:
-            start_x (int, optional): The starting x-coordinate for
-                generation. Defaults to 0.
-            start_y (int, optional): The starting y-coordinate for
-                generation. Defaults to 0.
         """
-        if not isinstance(start_x, int):
-            raise TypeError("Expected int for start_x, "
-                            f"got {type(start_x).__name__}")
-        if not isinstance(start_y, int):
-            raise TypeError("Expected int for start_y, "
-                            f"got {type(start_y).__name__}")
-        if start_x < 0 or start_y < 0:
-            raise ValueError("Coordinates start_x and start_y cannot "
-                             "be negative")
 
-        stack = [(start_x, start_y)]
-        self.visited.add((start_x, start_y))
+        stack = [(0, 0)]
+        self.visited.add((0, 0))
 
         while stack:
             x, y = stack[-1]
@@ -95,7 +80,7 @@ class RecursiveBacktracker(GenerationStrategy):
                     stack.append(c)
 
                     if self.viz and self.vizualize:
-                        sleep(0.04)
+                        sleep(0.03)
                         self.viz.render_cells(x, y)
                         self.viz.render_cells(nx, ny)
 

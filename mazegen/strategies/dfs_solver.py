@@ -22,7 +22,7 @@ class DFSSolver(SolverStrategy):
                 representing the path from entry to exit. Returns an
                 empty string if no path is found.
         """
-        stack = [(self.entry[0], self.entry[1], "")]
+        stack = [(*self.entry, "")]
         visited = {self.entry}
 
         while stack:

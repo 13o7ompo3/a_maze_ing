@@ -43,9 +43,19 @@ class DisjointSet:
             raise TypeError(f"Expected int for i, got {type(i).__name__}")
         if i < 0 or i >= len(self.parent):
             raise ValueError(f"Index i ({i}) is out of bounds for DisjointSet")
-        if self.parent[i] != i:
-            self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
+
+        # Find the root of the set containing i
+        root = i
+        while self.parent[root] != root:
+            root = self.parent[root]
+
+        # Make all nodes on the path point directly to the root
+        curr = i
+        while curr != root:
+            nxt = self.parent[curr]
+            self.parent[curr] = root
+            curr = nxt
+        return root
 
     def union(self, i: int, j: int) -> bool:
         """Merge the sets containing elements i and j.
@@ -69,6 +79,7 @@ class DisjointSet:
         root_i = self.find(i)
         root_j = self.find(j)
 
+        # If the sets are already in the same set, return False
         if root_i != root_j:
             self.parent[root_i] = root_j
             return True
@@ -147,12 +158,12 @@ class Kruskal(GenerationStrategy):
                 continue
 
             if ds.union(idx_a, idx_b):
-                self.grid.remove_wall(cell_a[0], cell_a[1], wall_a)
-                self.grid.remove_wall(cell_b[0], cell_b[1], wall_b)
+                self.grid.remove_wall(*cell_a, wall_a)
+                self.grid.remove_wall(*cell_b, wall_b)
                 if self.viz and self.vizualize:
-                    sleep(0.04)
-                    self.viz.render_cells(cell_a[0], cell_a[1])
-                    self.viz.render_cells(cell_b[0], cell_b[1])
+                    sleep(0.03)
+                    self.viz.render_cells(*cell_a)
+                    self.viz.render_cells(*cell_b)
             else:
                 rejected_edges.append((cell_a, cell_b, wall_a, wall_b))
 

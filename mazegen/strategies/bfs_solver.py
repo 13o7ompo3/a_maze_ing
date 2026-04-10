@@ -21,7 +21,7 @@ class BFSSolver(SolverStrategy):
                 representing the path from entry to exit. Returns an
                 empty string if no path is found.
         """
-        queue = deque([(self.entry[0], self.entry[1], "")])
+        queue = deque([(*self.entry, "")])
         visited = {self.entry}
 
         while queue:
