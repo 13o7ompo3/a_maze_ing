@@ -1,10 +1,19 @@
-WIDTH=9
-HEIGHT=7
+# Maze Dimensions
+WIDTH=20
+HEIGHT=20
+
+# Endpoints
 ENTRY=0,0
-EXIT=0,1
+EXIT=19,19
+
+# File Output
 OUTPUT_FILE=maze.txt
-PERFECT=false
-VIZUALIZE=False
+
+# Generation and Solving Settings
+PERFECT=True
 ALGORITHM=kruskal
-#STRATEGY=dfs
-#SEED=
+STRATEGY=dfs
+#SEED=1337
+
+# Visuals
+VIZUALIZE=True

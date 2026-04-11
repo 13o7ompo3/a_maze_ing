@@ -97,7 +97,6 @@ class ConsoleVisualizer:
         iterates through the entire grid to render each individual cell.
         """
         os.system('cls' if os.name == 'nt' else 'clear')
-        # sys.stdout.write("\033[H")
 
         print(f"MAZE VISUALIZATION ({self.grid.width}x{self.grid.height})")
         for y in range(self.grid.height):

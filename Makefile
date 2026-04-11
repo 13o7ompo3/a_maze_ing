@@ -33,7 +33,7 @@ lint-strict:
 	python3 -m mypy . --strict
 
 build:
-	python3 -m pip install --user --upgrade build "setuptools>=61.0" wheel
+	python3 -m pip install  --upgrade build "setuptools>=61.0" wheel
 	python3 -m build --no-isolation
 
 venv:

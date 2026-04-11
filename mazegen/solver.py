@@ -12,7 +12,8 @@ class MazeSolver:
     Depth-First Search) based on the provided configuration.
     """
 
-    def __init__(self, grid: Grid, entry: tuple, exit: tuple,
+    def __init__(self, grid: Grid, entry: tuple[int, int],
+                 exit: tuple[int, int],
                  viz: ConsoleVisualizer | None = None,
                  strategy: str = "bfs",
                  vizualize: bool = True) -> None:

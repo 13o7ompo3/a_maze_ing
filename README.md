@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by obahya and tel-atou.*
+*This project has been created as part of the 42 curriculum by obahya, tel-atou.*
 
 # A-Maze-ing
 
@@ -131,7 +131,7 @@ The core architecture of A-Maze-ing has been designed as a modular, standalone P
 
 ### Roles
 * **obahya:** Focused on the core mathematical logic, graph theory implementation (Disjoint Sets, DFS/BFS logic), bitwise cell operations, and optimizing the algorithms (converting recursion to iterative stacks).
-* **tel-atou:** Handled the project's architecture, robust input parsing, dynamic terminal visualization (ANSI rendering), Python packaging (`setup.py` / `build`), and the main application loop.
+* **tel-atou:** Handled the project's architecture, robust input parsing, Python packaging, and the main application loop.
 
 ### Planning & Evolution
 We initially anticipated building the visualizer *after* perfecting the core algorithms. However, we quickly realized that debugging raw integer arrays was nearly impossible. We pivoted to build the `ConsoleVisualizer` first, which allowed us to visually debug our Kruskal's and Backtracker implementations in real-time.
@@ -141,23 +141,18 @@ We initially anticipated building the visualizer *after* perfecting the core alg
 * **What Could Be Improved:** The console rendering relies on ANSI escape codes to jump the cursor around the terminal. While visually impressive, rendering massive mazes (e.g., 100x100+) is bottlenecked by standard terminal string flushing speeds. Future iterations could use `curses` or a dedicated GUI library like `pygame` for faster rendering.
 
 ### Tools Used
-* **IDE:** VS Code
 * **Linting & Typing:** `flake8` (style enforcement) and `mypy` (static type checking).
 * **Version Control:** Git & GitHub.
-* **Build System:** `Make` for workflow automation.
 
 ---
 
-## Resources & AI Usage
+## Resources
 
 ### Standard Resources
-* **Graph Theory Basics:** Used to understand spanning trees and graph traversal.
 * **Wikipedia:** Reference for Kruskal's algorithm and Union-Find data structures.
 * **Python Docs:** Reference for `termios` and `tty` for real-time keypress detection.
 
 ### Explicit AI Usage Declaration
-In accordance with 42 curriculum guidelines, Artificial Intelligence (LLMs) was utilized strictly as an assistant in the following capacities:
-* **Debugging:** Assisting in identifying infinite loops within early graph traversal implementations.
 * **Optimization:** Providing insights on effectively refactoring the Recursive Backtracker from a standard recursive function into a while-loop using an iterative stack.
 * **Code Quality:** Generating and validating Google-style PEP 257 compliant docstrings across the codebase, and offering automated diffs to resolve strict `flake8` line-length (E501) and trailing whitespace errors.
 
